@@ -12,14 +12,7 @@ class Assign:
         return self.estimator
 
     def assign(self, cars, gates, capacity, time):
-        """
-        Determines the gate number to dispatch the item in car[0].
-        :param cars: List with weight of items
-        :param gates: List with weight of boxes at gates
-        :param capacity: Box capacity
-        :param time: Maximum time (in seconds) allowed for allocation; if 0, then there are no time-limits.
-        :return: The gate number to assign item in car[0]
-        """
+        
         def time_is_up(start, time):
             if time == 0:
                 return False
@@ -43,8 +36,44 @@ class Assign:
                 gates[g] -= w
             return
 
-        # IMPLEMENT THIS ROUTINE
-        # Suggestion: Use an iterative-deepening version of DFBnB.
-        # Call 'self.estimator.get_giveaway(gates)' for the heuristic estimate of future giveaway
+        def dfbnb(car_idx, curr_giveaway, best_giveaway, start_time):
+            if time_is_up(start_time, time) or curr_giveaway > best_giveaway:
+                return float('inf')
 
-        return 0
+            if car_idx == len(cars):
+                return curr_giveaway
+
+            heuristic = self.estimator.get_giveaway(gates)
+            if curr_giveaway + heuristic >= best_giveaway:
+                return float('inf')
+
+            min_giveaway = float('inf')
+            for g in range(len(gates)):
+                info = do_assign(cars[car_idx], g)
+                filled, giveaway = info
+                next_giveaway = dfbnb(car_idx + 1, curr_giveaway + giveaway, best_giveaway, start_time)
+                min_giveaway = min(min_giveaway, next_giveaway)
+
+                if next_giveaway < best_giveaway:
+                    best_giveaway = next_giveaway
+
+                undo_assign(cars[car_idx], g, info)
+
+            return min_giveaway
+
+        start_time = timer()
+        best_giveaway = float('inf')
+        best_gate = 0
+        
+        for g in range(len(gates)):
+            info = do_assign(cars[0], g)
+            filled, giveaway = info
+            curr_giveaway = dfbnb(1, giveaway, best_giveaway, start_time)
+            
+            if curr_giveaway < best_giveaway:
+                best_giveaway = curr_giveaway
+                best_gate = g
+
+            undo_assign(cars[0], g, info)
+
+        return best_gate
