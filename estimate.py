@@ -24,12 +24,15 @@ class InformedEstimator(Estimator):
 
     def compute(self):
         # You implement this (optional) in case you want to do some onetime pre-computations.
-        self.multiplier = self.avg / self.std
+        return
 
     def get_giveaway(self, gates):
-        # You implement this.
-        # Estimate the future giveaway for the partially filled boxes at the gates.
-        total_weight = sum(gates) # total weight of the boxes at the gates.
-        giveaway = max(0, total_weight - self.num_gates * self.capacity) # excess weight (giveaway) above the capacity.
-        heuristic_estimate = giveaway * self.multiplier # Apply the heuristic multiplier to the giveaway.
-        return heuristic_estimate
+        total = 0
+        for g in gates:
+            if g >= (self.capacity - (self.avg - 0.8 * self.std)):
+                total += (g + self.avg - 0.8 * self.std) - self.capacity
+            elif g >= (self.capacity - (self.avg - 0.8 * self.std)):
+                total += (g + self.avg - 0.8 * self.std) - self.capacity
+            else:
+                total = total
+        return total
