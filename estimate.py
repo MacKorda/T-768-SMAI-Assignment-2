@@ -29,8 +29,8 @@ class InformedEstimator(Estimator):
     def get_giveaway(self, gates):
         total = 0
         for g in gates:
-            if g >= (self.capacity - (self.avg - 0.8 * self.std)):
-                total += (g + self.avg - 0.8 * self.std) - self.capacity
+            if g >= (self.capacity - (self.avg - 0.6 * self.std)):
+                total += (g + self.avg - 0.6 * self.std) - self.capacity
             elif g >= (self.capacity - (self.avg - 0.8 * self.std)):
                 total += (g + self.avg - 0.8 * self.std) - self.capacity
             else:
